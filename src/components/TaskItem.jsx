@@ -1,9 +1,6 @@
-import CheckIcon from '../assets/icons/check.svg?react';
-import LoaderIcon from '../assets/icons/loader-circle.svg?react';
-import GroupIcon from '../assets/icons/Group.svg?react';
-import TrashIcon from '../assets/icons/trash.svg?react';
-
 import Button from './Button';
+
+import { CheckIcon, LoaderIcon, TrashIcon, DetailsIcon } from '../assets/icons';
 
 const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
   const getStatusClasse = () => {
@@ -48,7 +45,7 @@ const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
           <TrashIcon className="text-[#9A9C9F]" />
         </Button>
         <a href="#" className="transition hover:opacity-60">
-          <GroupIcon />
+          <DetailsIcon />
         </a>
       </div>
     </div>
