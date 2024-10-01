@@ -45,7 +45,7 @@ const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
           variant="ghost"
           onClick={() => handleDeleteClick(task.id)}
         >
-          <TrashIcon className="text=[#9A9C9F]" />
+          <TrashIcon className="text-[#9A9C9F]" />
         </Button>
         <a href="#" className="transition hover:opacity-60">
           <GroupIcon />
