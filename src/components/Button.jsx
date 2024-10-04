@@ -14,7 +14,7 @@ const Button = ({
       color: {
         primary: 'bg-brand-primary text-white',
         ghost: 'bg-transparent text-brand-dark-gray',
-        secondary: 'bg-[#EEEEEE] text-brand-dark-blue',
+        secondary: 'bg-brand-light-gray text-brand-dark-blue',
       },
       size: {
         small: 'py-1 text-xs',
