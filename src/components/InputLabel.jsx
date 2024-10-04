@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const InputLabel = ({ label, children, ...rest }) => {
   return (
     <label className="flex flex-col space-y-1 text-left" {...rest}>
@@ -7,6 +9,11 @@ const InputLabel = ({ label, children, ...rest }) => {
       {children}
     </label>
   );
+};
+
+InputLabel.propTypes = {
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default InputLabel;
