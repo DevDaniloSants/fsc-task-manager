@@ -38,7 +38,7 @@ const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
       <div className="flex items-center gap-2">
         <Button
           className="transition hover:opacity-60"
-          variant="ghost"
+          color="ghost"
           onClick={() => handleDeleteClick(task.id)}
         >
           <TrashIcon className="text-brand-text-gray" />
