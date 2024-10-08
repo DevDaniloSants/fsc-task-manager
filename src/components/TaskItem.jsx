@@ -1,9 +1,13 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { CheckIcon, DetailsIcon, LoaderIcon, TrashIcon } from '../assets/icons';
 import Button from './Button';
 
-const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
+const TaskItem = ({ task, handleCheckboxClick, onDeleteSuccess }) => {
+  const [deleteTaskIsLoading, setDeleteTaskIsLoading] = useState(false);
+
   const getStatusClasse = () => {
     if (task.status === 'done') {
       return 'bg-brand-primary text-brand-primary';
@@ -14,6 +18,23 @@ const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
     if (task.status === 'not_started') {
       return 'bg-brand-dark-blue text-brand-dark-blue';
     }
+  };
+
+  const handleDeleteClick = async () => {
+    setDeleteTaskIsLoading(true);
+    const response = await fetch(`http://localhost:3000/tasks/${task.id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response) {
+      setDeleteTaskIsLoading(false);
+      return toast.error(
+        'Erro ao deletar a tarefa. Por favor, tente novamente.'
+      );
+    }
+
+    onDeleteSuccess(task.id);
+    setDeleteTaskIsLoading(false);
   };
 
   return (
@@ -42,8 +63,13 @@ const TaskItem = ({ task, handleCheckboxClick, handleDeleteClick }) => {
           className="transition hover:opacity-60"
           color="ghost"
           onClick={() => handleDeleteClick(task.id)}
+          disable={deleteTaskIsLoading.toString()}
         >
-          <TrashIcon className="text-brand-text-gray" />
+          {deleteTaskIsLoading ? (
+            <LoaderIcon className="animate-spin text-brand-text-gray" />
+          ) : (
+            <TrashIcon className="text-brand-text-gray" />
+          )}
         </Button>
         <a href="#" className="transition hover:opacity-60">
           <DetailsIcon />
@@ -60,7 +86,7 @@ TaskItem.propTypes = {
     status: PropTypes.oneOf(['not_started', 'in_progress', 'done']),
   }).isRequired,
   handleCheckboxClick: PropTypes.func.isRequired,
-  handleDeleteClick: PropTypes.func.isRequired,
+  onDeleteSuccess: PropTypes.func.isRequired,
 };
 
 export default TaskItem;

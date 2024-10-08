@@ -8,13 +8,6 @@
       "status": "in_progress"
     },
     {
-      "id": "2",
-      "title": "Reunião com cliente",
-      "description": "Discutir os requisitos finais do projeto com o cliente.",
-      "time": "afternoon",
-      "status": "in_progress"
-    },
-    {
       "id": "3",
       "title": "Implementar login",
       "description": "Desenvolver a funcionalidade de login para usuários.",
@@ -41,13 +34,6 @@
       "description": "Resolver os bugs encontrados no módulo de pagamento.",
       "time": "afternoon",
       "status": "done"
-    },
-    {
-      "id": "41fd6840-cd04-47f7-92c9-c9d90d6e4ce3",
-      "title": "teste",
-      "time": "morning",
-      "description": "teste",
-      "status": "not_started"
     }
   ]
 }

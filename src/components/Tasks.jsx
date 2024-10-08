@@ -23,7 +23,6 @@ const Tasks = () => {
 
       const tasks = await response.json();
       setTask(tasks);
-      console.log(tasks);
     };
 
     fetchTasks();
@@ -57,17 +56,7 @@ const Tasks = () => {
     setTask(newTasks);
   };
 
-  const handleTaskDeleteClick = async (taskId) => {
-    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-      method: 'DELETE',
-    });
-
-    if (!response) {
-      return toast.error(
-        'Erro ao deletar a tarefa. Por favor, tente novamente.'
-      );
-    }
-
+  const onDeleteTaskSuccess = async (taskId) => {
     const newTasks = tasks.filter((task) => task.id !== taskId);
     setTask(newTasks);
 
@@ -129,7 +118,7 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              handleDeleteClick={handleTaskDeleteClick}
+              onDeleteSuccess={onDeleteTaskSuccess}
             />
           ))}
         </div>
@@ -142,7 +131,7 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              handleDeleteClick={handleTaskDeleteClick}
+              onDeleteSuccess={onDeleteTaskSuccess}
             />
           ))}
         </div>
@@ -155,7 +144,7 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              handleDeleteClick={handleTaskDeleteClick}
+              onDeleteSuccess={onDeleteTaskSuccess}
             />
           ))}
         </div>
