@@ -57,16 +57,38 @@ const Tasks = () => {
     setTask(newTasks);
   };
 
-  const handleTaskDeleteClick = (taskId) => {
-    const newTasks = tasks.filter((task) => task.id !== taskId);
+  const handleTaskDeleteClick = async (taskId) => {
+    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+      method: 'DELETE',
+    });
 
+    if (!response) {
+      return toast.error(
+        'Erro ao deletar a tarefa. Por favor, tente novamente.'
+      );
+    }
+
+    const newTasks = tasks.filter((task) => task.id !== taskId);
     setTask(newTasks);
+
     toast.success('Tarefa deletada com sucesso!');
   };
 
-  const handleAddTaskSubmit = (task) => {
-    const newTasks = [...tasks, task];
-    setTask(newTasks);
+  const handleAddTaskSubmit = async (task) => {
+    const response = await fetch('http://localhost:3000/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task),
+    }).then((res) => res.json());
+
+    if (!response) {
+      return toast.error(
+        'Erro ao adicionar a tarefa. Por favor, tente novamente.'
+      );
+    }
+
+    setTask([...tasks, response]);
+
     toast.success('Tarefa adicionada com sucesso!');
   };
 
