@@ -112,15 +112,21 @@ const AddTaskDialog = ({
                   label="Título"
                   placeholder="Título da tarefa"
                   ref={titleRef}
+                  disabled={isLoading}
                   errorMessage={titleError?.message}
                 />
 
-                <TimeSelect ref={timeRef} errorMessage={timeError?.message} />
+                <TimeSelect
+                  ref={timeRef}
+                  errorMessage={timeError?.message}
+                  disabled={isLoading}
+                />
 
                 <Input
                   label="Descrição"
                   placeholder="Descreva a tarefa"
                   ref={descriptionRef}
+                  disabled={isLoading}
                   errorMessage={descriptionError?.message}
                 />
 
