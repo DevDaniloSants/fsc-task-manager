@@ -1,13 +1,6 @@
 {
   "tasks": [
     {
-      "id": "1",
-      "title": "Escrever documentação",
-      "description": "Finalizar a documentação técnica do projeto.",
-      "time": "morning",
-      "status": "in_progress"
-    },
-    {
       "id": "3",
       "title": "Implementar login",
       "description": "Desenvolver a funcionalidade de login para usuários.",
@@ -34,27 +27,6 @@
       "description": "Resolver os bugs encontrados no módulo de pagamento.",
       "time": "afternoon",
       "status": "done"
-    },
-    {
-      "id": "2ae4f17b-04e6-49a1-a394-3d502e6e075b",
-      "title": "teste",
-      "time": "morning",
-      "description": "teste",
-      "status": "not_started"
-    },
-    {
-      "id": "b42d539c-a4cb-46a2-a862-1e865a8f95ec",
-      "title": "teste",
-      "time": "morning",
-      "description": "teste",
-      "status": "not_started"
-    },
-    {
-      "id": "9ba00f51-d5bc-4855-8fc2-fcab0ad47b21",
-      "title": "teste",
-      "time": "morning",
-      "description": "teste",
-      "status": "not_started"
     }
   ]
 }
