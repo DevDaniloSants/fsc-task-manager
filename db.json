@@ -2,9 +2,9 @@
   "tasks": [
     {
       "id": "3",
-      "title": "Implementar login",
+      "title": "Implementar login3",
       "description": "Desenvolver a funcionalidade de login para usuários.",
-      "time": "morning",
+      "time": "evening",
       "status": "not_started"
     },
     {
@@ -13,20 +13,6 @@
       "description": "Desenvolver o layout da página inicial do sistema.",
       "time": "evening",
       "status": "not_started"
-    },
-    {
-      "id": "5",
-      "title": "Configurar ambiente de desenvolvimento",
-      "description": "Ambiente local de desenvolvimento configurado corretamente.",
-      "time": "morning",
-      "status": "done"
-    },
-    {
-      "id": "6",
-      "title": "Correção de bugs",
-      "description": "Resolver os bugs encontrados no módulo de pagamento.",
-      "time": "afternoon",
-      "status": "done"
     }
   ]
 }

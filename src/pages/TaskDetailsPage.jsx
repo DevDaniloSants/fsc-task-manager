@@ -40,6 +40,19 @@ const TaskDetailsPage = () => {
     navigate(-1);
   };
 
+  const handleDeleteClick = async () => {
+    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response) {
+      return toast.error('Não foi possível deletar a tarefa');
+    }
+
+    toast.success('Tarefa deletada com sucesso!');
+    handleBackButtonClick();
+  };
+
   const handleSaveClick = async () => {
     setSaveIsLoading(true);
 
@@ -127,7 +140,11 @@ const TaskDetailsPage = () => {
             </h2>
           </div>
 
-          <Button color="danger" className="h-fit self-end">
+          <Button
+            color="danger"
+            className="h-fit self-end"
+            onClick={handleDeleteClick}
+          >
             <TrashIcon />
             Deletar tarefa
           </Button>
