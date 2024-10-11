@@ -17,7 +17,7 @@ const AddTaskDialog = ({
   onSubmitSuccess,
   onSubmitError,
 }) => {
-  const [erros, setErros] = useState([]);
+  const [errors, setErrors] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const nodeRef = useRef();
@@ -26,6 +26,8 @@ const AddTaskDialog = ({
   const descriptionRef = useRef();
 
   const handleSaveClick = async () => {
+    setIsLoading(true);
+
     const newErros = [];
 
     const title = titleRef.current.value;
@@ -47,10 +49,10 @@ const AddTaskDialog = ({
       });
     }
 
-    setErros(newErros);
+    setErrors(newErros);
 
     if (newErros.length > 0) {
-      return;
+      return setIsLoading(false);
     }
 
     const task = {
@@ -60,8 +62,6 @@ const AddTaskDialog = ({
       description: description,
       status: 'not_started',
     };
-
-    setIsLoading(true);
 
     const response = await fetch('http://localhost:3000/tasks', {
       method: 'POST',
@@ -79,9 +79,9 @@ const AddTaskDialog = ({
     handleClose();
   };
 
-  const titleError = erros.find((error) => error.inputTitle === 'title');
-  const timeError = erros.find((error) => error.inputTitle === 'time');
-  const descriptionError = erros.find(
+  const titleError = errors.find((error) => error.inputTitle === 'title');
+  const timeError = errors.find((error) => error.inputTitle === 'time');
+  const descriptionError = errors.find(
     (error) => error.inputTitle === 'description'
   );
 
@@ -146,7 +146,10 @@ const AddTaskDialog = ({
                     disabled={isLoading}
                   >
                     {isLoading ? (
-                      <LoaderIcon className="animate-spin text-white" />
+                      <>
+                        <LoaderIcon className="animate-spin text-white" />
+                        Salvando
+                      </>
                     ) : (
                       'Salvar'
                     )}
