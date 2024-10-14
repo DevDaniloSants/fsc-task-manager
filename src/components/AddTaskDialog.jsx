@@ -1,8 +1,9 @@
 import './AddTaskDialog.css';
 
 import PropTypes from 'prop-types';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { CSSTransition } from 'react-transition-group';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,73 +18,40 @@ const AddTaskDialog = ({
   onSubmitSuccess,
   onSubmitError,
 }) => {
-  const [errors, setErrors] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm();
 
   const nodeRef = useRef();
-  const titleRef = useRef();
-  const timeRef = useRef();
-  const descriptionRef = useRef();
 
-  const handleSaveClick = async () => {
-    setIsLoading(true);
-
-    const newErros = [];
-
-    const title = titleRef.current.value;
-    const time = timeRef.current.value;
-    const description = descriptionRef.current.value;
-
-    if (!title.trim()) {
-      newErros.push({ inputTitle: 'title', message: 'O título é obrigatório' });
-    }
-
-    if (!time.trim()) {
-      newErros.push({ inputTitle: 'time', message: 'O horário é obrigatório' });
-    }
-
-    if (!description.trim()) {
-      newErros.push({
-        inputTitle: 'description',
-        message: 'A descrição é obrigatória',
-      });
-    }
-
-    setErrors(newErros);
-
-    if (newErros.length > 0) {
-      return setIsLoading(false);
-    }
-
+  const handleSaveClick = async (data) => {
     const task = {
+      ...data,
       id: uuidv4(),
-      title: title,
-      time: time,
-      description: description,
       status: 'not_started',
     };
 
     const response = await fetch('http://localhost:3000/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(task),
+      body: JSON.stringify({
+        title: data.title.trim(),
+        description: data.description.trim(),
+        time: data.time,
+      }),
     }).then((res) => res.json());
 
     if (!response) {
-      setIsLoading(false);
       return onSubmitError();
     }
 
     onSubmitSuccess(task);
-    setIsLoading(false);
+    reset();
     handleClose();
   };
-
-  const titleError = errors.find((error) => error.inputTitle === 'title');
-  const timeError = errors.find((error) => error.inputTitle === 'time');
-  const descriptionError = errors.find(
-    (error) => error.inputTitle === 'description'
-  );
 
   return (
     <CSSTransition
@@ -99,7 +67,10 @@ const AddTaskDialog = ({
             ref={nodeRef}
             className="fixed left-0 top-0 flex h-screen w-screen items-center justify-center backdrop-blur-sm"
           >
-            <div className="w-[366px] rounded-xl bg-white p-5 text-center shadow">
+            <form
+              onSubmit={handleSubmit(handleSaveClick)}
+              className="w-[366px] rounded-xl bg-white p-5 text-center shadow"
+            >
               <h2 className="text-brand-dark-blue] text-xl font-semibold">
                 Nova Tarefa
               </h2>
@@ -111,23 +82,51 @@ const AddTaskDialog = ({
                 <Input
                   label="Título"
                   placeholder="Título da tarefa"
-                  ref={titleRef}
-                  disabled={isLoading}
-                  errorMessage={titleError?.message}
+                  disabled={isSubmitting}
+                  {...register('title', {
+                    required: 'O título é obrigatório',
+                    minLength: {
+                      value: 3,
+                      message: 'O título deve ter no mínimo 3 caracteres',
+                    },
+                    validate: (value) => {
+                      if (!value.trim()) {
+                        return 'O título deve ter no mínimo 3 caracteres';
+                      }
+
+                      return true;
+                    },
+                  })}
+                  errorMessage={errors?.title?.message}
                 />
 
                 <TimeSelect
-                  ref={timeRef}
-                  errorMessage={timeError?.message}
-                  disabled={isLoading}
+                  disabled={isSubmitting}
+                  {...register('time', {
+                    required: 'Escolha um período do dia',
+                  })}
+                  errorMessage={errors?.time?.message}
                 />
 
                 <Input
                   label="Descrição"
                   placeholder="Descreva a tarefa"
-                  ref={descriptionRef}
-                  disabled={isLoading}
-                  errorMessage={descriptionError?.message}
+                  disabled={isSubmitting}
+                  {...register('description', {
+                    required: 'A descrição é obrigatória',
+                    minLength: {
+                      value: 6,
+                      message: 'A descrição deve ter no mínimo 6 caracteres',
+                    },
+                    validate: (value) => {
+                      if (!value.trim()) {
+                        return 'O título deve ter no mínimo 6 caracteres';
+                      }
+
+                      return true;
+                    },
+                  })}
+                  errorMessage={errors?.description?.message}
                 />
 
                 <div className="flex gap-3">
@@ -142,10 +141,10 @@ const AddTaskDialog = ({
                   <Button
                     size="large"
                     className="w-full"
-                    onClick={() => handleSaveClick()}
-                    disabled={isLoading}
+                    type="submit"
+                    disabled={isSubmitting}
                   >
-                    {isLoading ? (
+                    {isSubmitting ? (
                       <>
                         <LoaderIcon className="animate-spin text-white" />
                         Salvando
@@ -156,7 +155,7 @@ const AddTaskDialog = ({
                   </Button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>,
           document.body
         )}
