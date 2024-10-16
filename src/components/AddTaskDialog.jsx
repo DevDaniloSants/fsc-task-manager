@@ -1,10 +1,12 @@
 import './AddTaskDialog.css';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
 import { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { CSSTransition } from 'react-transition-group';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { LoaderIcon } from '../assets/icons';
@@ -12,12 +14,7 @@ import Button from './Button';
 import Input from './Input';
 import TimeSelect from './TimeSelect';
 
-const AddTaskDialog = ({
-  isOpen,
-  handleClose,
-  onSubmitSuccess,
-  onSubmitError,
-}) => {
+const AddTaskDialog = ({ isOpen, handleClose }) => {
   const {
     register,
     handleSubmit,
@@ -26,6 +23,26 @@ const AddTaskDialog = ({
   } = useForm();
 
   const nodeRef = useRef();
+
+  const queryClient = useQueryClient();
+  const { mutate: addTask } = useMutation({
+    mutationKey: ['addTask'],
+    mutationFn: async (task) => {
+      const response = await fetch('http://localhost:3000/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(task),
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      return response.json();
+    },
+  });
 
   const handleSaveClick = async (data) => {
     const task = {
@@ -36,19 +53,24 @@ const AddTaskDialog = ({
       status: 'not_started',
     };
 
-    const response = await fetch('http://localhost:3000/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(task),
-    }).then((res) => res.json());
+    addTask(task, {
+      onSuccess: () => {
+        queryClient.setQueryData(['tasks'], (oldTasks) => {
+          return [task, ...oldTasks];
+        });
 
-    if (!response) {
-      return onSubmitError();
-    }
-
-    onSubmitSuccess(task);
-    reset();
-    handleClose();
+        handleClose();
+        reset({
+          title: '',
+          time: 'morning',
+          description: '',
+        });
+        toast.success('Tarefa adicionada com sucesso!');
+      },
+      onError: () => {
+        toast.error('Erro ao salvar a tarefa');
+      },
+    });
   };
 
   return (
@@ -165,7 +187,6 @@ const AddTaskDialog = ({
 AddTaskDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  onSubmitSuccess: PropTypes.func.isRequired,
 };
 
 export default AddTaskDialog;
