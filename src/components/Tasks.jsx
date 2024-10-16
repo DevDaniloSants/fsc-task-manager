@@ -57,14 +57,6 @@ const Tasks = () => {
     queryClient.setQueryData(['tasks'], newTasks);
   };
 
-  const onDeleteTaskSuccess = async (taskId) => {
-    queryClient.setQueryData(['tasks'], (currentTasks) => {
-      return currentTasks.filter((task) => task.id !== taskId);
-    });
-
-    toast.success('Tarefa deletada com sucesso!');
-  };
-
   return (
     <div className="w-full space-y-6 px-8 py-16">
       <div className="mb-6 flex w-full justify-between">
@@ -106,7 +98,6 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              onDeleteSuccess={onDeleteTaskSuccess}
             />
           ))}
         </div>
@@ -123,7 +114,6 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              onDeleteSuccess={onDeleteTaskSuccess}
             />
           ))}
         </div>
@@ -140,7 +130,6 @@ const Tasks = () => {
               key={task.id}
               task={task}
               handleCheckboxClick={handleTaskCheckboxClick}
-              onDeleteSuccess={onDeleteTaskSuccess}
             />
           ))}
         </div>
