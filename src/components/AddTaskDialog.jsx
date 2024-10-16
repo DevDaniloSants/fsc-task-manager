@@ -29,19 +29,17 @@ const AddTaskDialog = ({
 
   const handleSaveClick = async (data) => {
     const task = {
-      ...data,
       id: uuidv4(),
+      title: data.title.trim(),
+      description: data.description.trim(),
+      time: data.time,
       status: 'not_started',
     };
 
     const response = await fetch('http://localhost:3000/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: data.title.trim(),
-        description: data.description.trim(),
-        time: data.time,
-      }),
+      body: JSON.stringify(task),
     }).then((res) => res.json());
 
     if (!response) {

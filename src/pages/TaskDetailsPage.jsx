@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -15,8 +15,6 @@ import Sidebar from '../components/Sidebar';
 import TimeSelect from '../components/TimeSelect';
 
 const TaskDetailsPage = () => {
-  const [task, setTask] = useState(null);
-
   const {
     register,
     handleSubmit,
@@ -28,59 +26,92 @@ const TaskDetailsPage = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchTask = async () => {
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteTask } = useMutation({
+    mutationKey: ['deleteTask', taskId],
+    mutationFn: async () => {
+      const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      const deletedTask = await response.json();
+
+      queryClient.setQueryData(['tasks'], (oldTasks) => {
+        return oldTasks.filter((task) => task.id !== deletedTask.id);
+      });
+    },
+  });
+
+  const { mutate: updateTask } = useMutation({
+    mutationKey: ['updateTask', taskId],
+    mutationFn: async (data) => {
+      const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      const updatedTask = await response.json();
+
+      queryClient.setQueryData(['tasks'], (oldTasks) => {
+        oldTasks.map((task) => {
+          if (task.id === taskId) {
+            return updatedTask;
+          }
+
+          return task;
+        });
+      });
+    },
+  });
+
+  const { data: task } = useQuery({
+    queryKey: ['task', taskId],
+    queryFn: async () => {
       const response = await fetch(`http://localhost:3000/tasks/${taskId}`);
       const data = await response.json();
-
-      setTask(data);
       reset(data);
-    };
 
-    fetchTask();
-  }, [taskId, reset]);
+      return data;
+    },
+  });
 
   const handleBackButtonClick = () => {
     navigate(-1);
   };
 
   const handleDeleteClick = async () => {
-    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-      method: 'DELETE',
+    deleteTask(undefined, {
+      onSuccess: () => {
+        toast.success('Tarefa deletada com sucesso!');
+        handleBackButtonClick();
+      },
+      onError: () => {
+        toast.error('Não foi possível deletar a tarefa');
+      },
     });
-
-    if (!response) {
-      return toast.error('Não foi possível deletar a tarefa');
-    }
-
-    toast.success('Tarefa deletada com sucesso!');
-    handleBackButtonClick();
   };
 
   const handleSaveClick = async (data) => {
-    const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+    updateTask(data, {
+      onSuccess: () => toast.success('Tarefa atualizada com sucesso'),
+      onError: () => toast.error('Não foi possível atualizar a tarefa'),
     });
-
-    if (!response) {
-      return toast.error('Não foi possível atualizar a tarefa');
-    }
-
-    const updatedTask = await response.json();
-    setTask(updatedTask);
-
-    toast.success('Tarefa atualizada com sucesso');
   };
 
   return (
     <div className="flex">
       <Sidebar />
-      <form
-        onSubmit={handleSubmit(handleSaveClick)}
-        className="w-full space-y-6 px-8 py-16"
-      >
+      <div className="w-full space-y-6 px-8 py-16">
         <div className="flex w-full justify-between">
           <div>
             <button
@@ -115,65 +146,65 @@ const TaskDetailsPage = () => {
             Deletar tarefa
           </Button>
         </div>
+        <form onSubmit={handleSubmit(handleSaveClick)}>
+          <div className="space-y-6 rounded-xl bg-brand-white p-6">
+            <div>
+              <Input
+                id="title"
+                label="Título"
+                {...register('title', {
+                  required: 'O título é obrigatório.',
+                  validate: (value) => {
+                    if (!value.trim()) {
+                      return 'O título não pode ser vazio.';
+                    }
+                    return true;
+                  },
+                })}
+                errorMessage={errors?.title?.message}
+              />
+            </div>
 
-        <div className="space-y-4 rounded-xl bg-brand-white p-6">
-          <Input
-            label="Título"
-            {...register('title', {
-              required: 'O título é obrigatório',
-              minLength: {
-                value: 3,
-                message: 'O título deve ter no mínimo 3 caracteres',
-              },
-              validate: (value) => {
-                if (!value.trim()) {
-                  return 'O título deve ter no mínimo 3 caracteres';
-                }
+            <div>
+              <TimeSelect
+                {...register('time', {
+                  required: 'O horário é obrigatório.',
+                })}
+                errorMessage={errors?.time?.message}
+              />
+            </div>
 
-                return true;
-              },
-            })}
-            errorMessage={errors?.title?.message}
-          />
-          <TimeSelect
-            {...register('time', {
-              required: 'Escolha um período do dia',
-            })}
-            errorMessage={errors?.time?.message}
-          />
-          <Input
-            label="Descrição"
-            {...register('description', {
-              required: 'A descrição é obrigatória',
-              minLength: {
-                value: 6,
-                message: 'A descrição deve ter no mínimo 6 caracteres',
-              },
-              validate: (value) => {
-                if (!value.trim()) {
-                  return 'O título deve ter no mínimo 6 caracteres';
-                }
+            <div>
+              <Input
+                id="description"
+                label="Descrição"
+                {...register('description', {
+                  required: 'A descrição é obrigatória.',
+                  validate: (value) => {
+                    if (!value.trim()) {
+                      return 'A descrição não pode ser vazia.';
+                    }
+                    return true;
+                  },
+                })}
+                errorMessage={errors?.description?.message}
+              />
+            </div>
+          </div>
 
-                return true;
-              },
-            })}
-            errorMessage={errors?.description?.message}
-          />
-        </div>
-
-        <div className="flex w-full justify-end gap-3">
-          <Button size="large" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <LoaderIcon className="animate-spin text-white" />
-                Salvando
-              </>
-            ) : (
-              'Salvar'
-            )}
-          </Button>
-        </div>
-      </form>
+          <div className="mt-2 flex w-full justify-end gap-3">
+            <Button
+              size="large"
+              color="primary"
+              disabled={isSubmitting}
+              type="submit"
+            >
+              {isSubmitting && <LoaderIcon className="animate-spin" />}
+              Salvar
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
