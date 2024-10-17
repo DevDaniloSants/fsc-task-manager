@@ -1,4 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -13,6 +12,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Sidebar from '../components/Sidebar';
 import TimeSelect from '../components/TimeSelect';
+import { useDeleteTask, useGetTask, useUpdateTask } from '../hooks/index.js';
 
 const TaskDetailsPage = () => {
   const {
@@ -26,63 +26,12 @@ const TaskDetailsPage = () => {
 
   const navigate = useNavigate();
 
-  const queryClient = useQueryClient();
+  const { mutate: deleteTask } = useDeleteTask(taskId);
+  const { mutate: updateTask } = useUpdateTask(taskId);
 
-  const { mutate: deleteTask } = useMutation({
-    mutationKey: ['deleteTask', taskId],
-    mutationFn: async () => {
-      const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      const deletedTask = await response.json();
-
-      queryClient.setQueryData(['tasks'], (oldTasks) => {
-        return oldTasks.filter((task) => task.id !== deletedTask.id);
-      });
-    },
-  });
-
-  const { mutate: updateTask } = useMutation({
-    mutationKey: ['updateTask', taskId],
-    mutationFn: async (data) => {
-      const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      const updatedTask = await response.json();
-
-      queryClient.setQueryData(['tasks'], (oldTasks) => {
-        oldTasks.map((task) => {
-          if (task.id === taskId) {
-            return updatedTask;
-          }
-
-          return task;
-        });
-      });
-    },
-  });
-
-  const { data: task } = useQuery({
-    queryKey: ['task', taskId],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:3000/tasks/${taskId}`);
-      const data = await response.json();
-      reset(data);
-
-      return data;
-    },
+  const { data: task } = useGetTask({
+    taskId,
+    onSuccess: (task) => reset(task),
   });
 
   const handleBackButtonClick = () => {
@@ -104,7 +53,7 @@ const TaskDetailsPage = () => {
   const handleSaveClick = async (data) => {
     updateTask(data, {
       onSuccess: () => toast.success('Tarefa atualizada com sucesso'),
-      onError: () => toast.error('Não foi possível atualizar a tarefa'),
+      onError: (error) => toast.error(error.message),
     });
   };
 
