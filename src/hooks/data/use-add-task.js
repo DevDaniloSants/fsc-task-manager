@@ -1,29 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { taskMutationKeys, taskQueryKeys } from '../../keys/index.js';
+import { api } from '../../lib/axios';
+
 const useAddTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['addTask'],
+    mutationKey: taskMutationKeys.add(),
     mutationFn: async (task) => {
-      const response = await fetch('http://localhost:3000/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(task),
-      });
-
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      const createdTask = await response.json();
+      const { data: createdTask } = await api.post('/tasks', task);
 
       return createdTask;
     },
     onSuccess: (createdTask) => {
-      queryClient.setQueryData(['tasks'], (oldTasks) => {
+      queryClient.setQueryData(taskQueryKeys.getAll(), (oldTasks) => {
         return [...oldTasks, createdTask];
       });
     },
