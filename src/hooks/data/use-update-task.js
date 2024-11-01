@@ -21,7 +21,7 @@ const useUpdateTask = (taskId) => {
           return task;
         });
       });
-      queryClient.setQueryData(['task', taskId], updatedTask);
+      queryClient.setQueryData(taskQueryKeys.getOne(taskId), updatedTask);
     },
   });
 };
