@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { CheckIcon, DetailsIcon, LoaderIcon, TrashIcon } from '../assets/icons';
-import { useDeleteTask } from '../hooks/index.js';
+import { useDeleteTask, useUpdateTask } from '../hooks/index.js';
 import Button from './Button';
 
-const TaskItem = ({ task, handleCheckboxClick }) => {
+const TaskItem = ({ task }) => {
   const { mutate: deleteTask, isPending } = useDeleteTask(task.id);
+  const { mutate: updateTask } = useUpdateTask(task.id);
 
   const getStatusClasse = () => {
     if (task.status === 'done') {
@@ -32,6 +33,30 @@ const TaskItem = ({ task, handleCheckboxClick }) => {
     });
   };
 
+  const getNewStatus = () => {
+    if (task.status === 'not_started') {
+      return 'in_progress';
+    }
+    if (task.status === 'in_progress') {
+      return 'done';
+    }
+    return 'not_started';
+  };
+
+  const handleCheckboxClick = () => {
+    updateTask(
+      { status: getNewStatus() },
+      {
+        onSuccess: () => {
+          toast.success('Tarefa atualizada com sucesso!');
+        },
+        onError: () => {
+          toast.error('Erro ao atualizar tarefa!');
+        },
+      }
+    );
+  };
+
   return (
     <div
       className={`flex items-center justify-between rounded-lg bg-opacity-10 px-4 py-3 text-sm ${getStatusClasse()}`}
@@ -44,7 +69,7 @@ const TaskItem = ({ task, handleCheckboxClick }) => {
             type="checkbox"
             checked={task.status === 'done'}
             className="absolute h-full w-full cursor-pointer opacity-0"
-            onChange={() => handleCheckboxClick(task.id)}
+            onChange={handleCheckboxClick}
           />
           {task.status === 'done' && <CheckIcon />}
           {task.status === 'in_progress' && (
@@ -80,7 +105,6 @@ TaskItem.propTypes = {
     title: PropTypes.string.isRequired,
     status: PropTypes.oneOf(['not_started', 'in_progress', 'done']),
   }).isRequired,
-  handleCheckboxClick: PropTypes.func.isRequired,
 };
 
 export default TaskItem;

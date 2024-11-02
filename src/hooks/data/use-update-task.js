@@ -8,7 +8,12 @@ const useUpdateTask = (taskId) => {
   return useMutation({
     mutationKey: taskMutationKeys.update(taskId),
     mutationFn: async (data) => {
-      const { data: updatedTask } = await api.put(`/tasks/${taskId}`, data);
+      const { data: updatedTask } = await api.patch(`/tasks/${taskId}`, {
+        title: data?.title?.trim(),
+        description: data?.description?.trim(),
+        status: data?.status,
+        time: data?.time,
+      });
 
       return updatedTask;
     },
